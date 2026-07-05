@@ -59,12 +59,11 @@ public class ClasspathScanner {
 
         for (File file : files) {
             if (file.isDirectory()) {
-                String sousPackage = packageName == null ? file.getName() : packageName + "." + file.getName(); 
+                String sousPackage = joinPackage(packageName, file.getName());
                 scanDirectory(file, sousPackage, annotationClass, result); //Récursif si le file est un dossier
             } else if (file.getName().endsWith(".class")) {
-                String className = packageName == null
-                        ? file.getName().substring(0, file.getName().length() - 6)
-                        : packageName + "." + file.getName().substring(0, file.getName().length() - 6);
+                String simpleName = file.getName().substring(0, file.getName().length() - 6);
+                String className = joinPackage(packageName, simpleName);
                 Class<?> clazz = Class.forName(className);
                 if (clazz.isAnnotationPresent(annotationClass)) {
                     result.add(clazz);
@@ -91,5 +90,12 @@ public class ClasspathScanner {
                 }
             }
         }
+    }
+
+    private static String joinPackage(String packageName, String name) {
+        if (packageName == null || packageName.isBlank()) {
+            return name;
+        }
+        return packageName + "." + name;
     }
 }
