@@ -11,6 +11,7 @@ import mg.nyainafw.err.UrlNotSupportedException;
 import mg.nyainafw.mapping.UrlHTTPMethod;
 import mg.nyainafw.mapping.UrlKey;
 import mg.nyainafw.mapping.UrlProcessor;
+import mg.nyainafw.model.ModelView;
 import mg.nyainafw.servlet.listener.FrontServletContextListener;
 
 public class FrontController extends HttpServlet {
@@ -41,18 +42,43 @@ public class FrontController extends HttpServlet {
     private void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html");
-        PrintWriter out = response.getWriter();
         try {
             Object result = executeRequest(request);
-            printDebugPage(request, out, result);
+            if (result instanceof ModelView modelView) {
+                forwardToView(request, response, modelView);
+            } else {
+                PrintWriter out = response.getWriter();
+                printDebugPage(request, out, result);
+            }
         } catch (UrlNotSupportedException e) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            PrintWriter out = response.getWriter();
             printError(out, e.toString());
         } catch (ReflectiveOperationException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            PrintWriter out = response.getWriter();
             printError(out, e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void forwardToView(HttpServletRequest request, HttpServletResponse response, ModelView modelView)
+            throws ServletException, IOException {
+        for (var entry : modelView.getData().entrySet()) {
+            request.setAttribute(entry.getKey(), entry.getValue());
+        }
+
+        request.getRequestDispatcher(buildJspPath(modelView.getViewName()))
+                .forward(request, response);
+    }
+
+    private String buildJspPath(String viewName) {
+        if (viewName == null || viewName.isBlank()) {
+            return "/index.jsp";
+        }
+
+        String path = viewName.startsWith("/") ? viewName : "/" + viewName;
+        return path.endsWith(".jsp") ? path : path + ".jsp";
     }
 
     private void printDebugPage(HttpServletRequest request, PrintWriter out, Object result) {
