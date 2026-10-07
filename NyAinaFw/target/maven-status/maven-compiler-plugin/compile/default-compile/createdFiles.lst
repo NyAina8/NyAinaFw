@@ -7,7 +7,10 @@ mg/nyainafw/mapping/UrlProcessor.class
 mg/nyainafw/servlet/FrontController.class
 mg/nyainafw/annotation/UrlMapping.class
 mg/nyainafw/annotation/MyController.class
+test/controller/TestController.class
 mg/nyainafw/util/ClasspathScanner.class
+mg/nyainafw/util/JsonSerializer.class
 mg/nyainafw/mapping/UrlControllerMap.class
+mg/nyainafw/model/ApiResponse.class
 mg/nyainafw/mapping/UrlKey.class
 mg/nyainafw/model/ModelView.class

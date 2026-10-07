@@ -11,8 +11,10 @@ import mg.nyainafw.err.UrlNotSupportedException;
 import mg.nyainafw.mapping.UrlHTTPMethod;
 import mg.nyainafw.mapping.UrlKey;
 import mg.nyainafw.mapping.UrlProcessor;
+import mg.nyainafw.model.ApiResponse;
 import mg.nyainafw.model.ModelView;
 import mg.nyainafw.servlet.listener.FrontServletContextListener;
+import mg.nyainafw.util.JsonSerializer;
 
 public class FrontController extends HttpServlet {
     private UrlProcessor urlProcessor;
@@ -25,7 +27,6 @@ public class FrontController extends HttpServlet {
             throw new ServletException("UrlProcessor introuvable dans le ServletContext");
         }
     }
-
     private Object executeRequest(HttpServletRequest request)
             throws UrlNotSupportedException, ReflectiveOperationException {
         String url = getRequestedUrl(request);
@@ -46,6 +47,8 @@ public class FrontController extends HttpServlet {
             Object result = executeRequest(request);
             if (result instanceof ModelView modelView) {
                 forwardToView(request, response, modelView);
+            } else if (result instanceof ApiResponse apiResponse) {
+                writeApiResponse(response, apiResponse);
             } else {
                 PrintWriter out = response.getWriter();
                 printDebugPage(request, out, result);
@@ -70,6 +73,12 @@ public class FrontController extends HttpServlet {
 
         request.getRequestDispatcher(buildJspPath(modelView.getViewName()))
                 .forward(request, response);
+    }
+
+    private void writeApiResponse(HttpServletResponse response, ApiResponse apiResponse) throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().print(JsonSerializer.toJson(apiResponse.getData()));
     }
 
     private String buildJspPath(String viewName) {
