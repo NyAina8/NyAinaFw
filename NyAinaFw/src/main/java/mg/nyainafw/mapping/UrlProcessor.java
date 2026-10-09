@@ -1,5 +1,6 @@
 package mg.nyainafw.mapping;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -64,17 +65,54 @@ public class UrlProcessor {
                 continue;
             }
 
-            if (!isSimpleType(parameterType)) {
-                throw new IllegalArgumentException(
-                        "Type de parametre non supporte pour le moment: " + parameterType.getName());
-            }
-
             String parameterName = getParameterName(parameter);
-            String rawValue = request == null ? null : request.getParameter(parameterName);
-            args[i] = convertSimpleValue(rawValue, parameterType, parameterName);
+            if (isSimpleType(parameterType)) {
+                String rawValue = request == null ? null : request.getParameter(parameterName);
+                args[i] = convertSimpleValue(rawValue, parameterType, parameterName);
+            } else {
+                args[i] = bindObject(parameterType, parameterName, request);
+            }
         }
 
         return args;
+    }
+
+    private Object bindObject(Class<?> type, String parameterName, HttpServletRequest request) {
+        try {
+            Object instance = type.getDeclaredConstructor().newInstance();
+            for (Field field : type.getDeclaredFields()) {
+                if (!isSimpleType(field.getType())) {
+                    continue;
+                }
+
+                String rawValue = getFieldValue(request, parameterName, field.getName());
+                if (rawValue == null) {
+                    continue;
+                }
+
+                field.setAccessible(true);
+                field.set(instance, convertSimpleValue(rawValue, field.getType(), field.getName()));
+            }
+            return instance;
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalArgumentException(
+                    "Impossible de creer l'objet " + type.getName()
+                            + ". Verifier qu'il possede un constructeur sans argument.",
+                    e);
+        }
+    }
+
+    private String getFieldValue(HttpServletRequest request, String parameterName, String fieldName) {
+        if (request == null) {
+            return null;
+        }
+
+        String prefixedName = parameterName + "." + fieldName;
+        String rawValue = request.getParameter(prefixedName);
+        if (rawValue != null) {
+            return rawValue;
+        }
+        return request.getParameter(fieldName);
     }
 
     private String getParameterName(Parameter parameter) {

@@ -4,6 +4,7 @@ mg/nyainafw/servlet/listener/FrontServletContextListener.class
 mg/nyainafw/mapping/UrlHTTPMethod.class
 mg/nyainafw/err/UrlAlreadyDefinedException.class
 mg/nyainafw/mapping/UrlProcessor.class
+test/model/Produit.class
 mg/nyainafw/servlet/FrontController.class
 mg/nyainafw/annotation/UrlMapping.class
 mg/nyainafw/annotation/MyController.class
