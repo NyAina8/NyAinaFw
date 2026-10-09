@@ -18,16 +18,19 @@ public final class JsonSerializer {
         if (value == null) {
             return "null";
         }
-        if (value instanceof String text) {
+        if (value instanceof String) {
+            String text = (String) value;
             return quote(text);
         }
-        if (value instanceof Character character) {
+        if (value instanceof Character) {
+            Character character = (Character) value;
             return quote(character.toString());
         }
         if (value instanceof Number || value instanceof Boolean) {
             return value.toString();
         }
-        if (value instanceof Enum<?> enumValue) {
+        if (value instanceof Enum<?>) {
+            Enum<?> enumValue = (Enum<?>) value;
             return quote(enumValue.name());
         }
         if (visited.containsKey(value)) {
@@ -36,10 +39,12 @@ public final class JsonSerializer {
 
         visited.put(value, Boolean.TRUE);
         try {
-            if (value instanceof Map<?, ?> map) {
+            if (value instanceof Map<?, ?>) {
+                Map<?, ?> map = (Map<?, ?>) value;
                 return serializeMap(map, visited);
             }
-            if (value instanceof Iterable<?> iterable) {
+            if (value instanceof Iterable<?>) {
+                Iterable<?> iterable = (Iterable<?>) value;
                 return serializeIterable(iterable, visited);
             }
             if (value.getClass().isArray()) {
@@ -54,7 +59,7 @@ public final class JsonSerializer {
     private static String serializeMap(Map<?, ?> map, Map<Object, Boolean> visited) {
         StringBuilder json = new StringBuilder("{");
         boolean first = true;
-        for (var entry : map.entrySet()) {
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
             if (!first) {
                 json.append(',');
             }
@@ -134,20 +139,34 @@ public final class JsonSerializer {
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
             switch (c) {
-                case '"' -> quoted.append("\\\"");
-                case '\\' -> quoted.append("\\\\");
-                case '\b' -> quoted.append("\\b");
-                case '\f' -> quoted.append("\\f");
-                case '\n' -> quoted.append("\\n");
-                case '\r' -> quoted.append("\\r");
-                case '\t' -> quoted.append("\\t");
-                default -> {
+                case '"':
+                    quoted.append("\\\"");
+                    break;
+                case '\\':
+                    quoted.append("\\\\");
+                    break;
+                case '\b':
+                    quoted.append("\\b");
+                    break;
+                case '\f':
+                    quoted.append("\\f");
+                    break;
+                case '\n':
+                    quoted.append("\\n");
+                    break;
+                case '\r':
+                    quoted.append("\\r");
+                    break;
+                case '\t':
+                    quoted.append("\\t");
+                    break;
+                default:
                     if (c < 0x20) {
                         quoted.append(String.format("\\u%04x", (int) c));
                     } else {
                         quoted.append(c);
                     }
-                }
+                    break;
             }
         }
         return quoted.append('"').toString();

@@ -5,6 +5,7 @@ import mg.nyainafw.annotation.UrlMapping;
 import mg.nyainafw.model.ApiResponse;
 import mg.nyainafw.model.ModelView;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @MyController
@@ -20,8 +21,23 @@ public class TestController {
 
     @UrlMapping("/api/test")
     public ApiResponse apiTest() {
-        return ApiResponse.ok(Map.of(
-                "message", "Bonjour depuis l'API",
-                "nomFramework", "NyAinaFw"));
+        Map<String, Object> data = new HashMap<>();
+        data.put("message", "Bonjour depuis l'API");
+        data.put("nomFramework", "NyAinaFw");
+        return ApiResponse.ok(data);
+    }
+
+    @UrlMapping("/api/primitive")
+    public ApiResponse apiPrimitive(
+            int id,
+            double prix,
+            boolean actif,
+            String nom) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", id);
+        data.put("prix", prix);
+        data.put("actif", actif);
+        data.put("nom", nom);
+        return ApiResponse.ok(data);
     }
 }

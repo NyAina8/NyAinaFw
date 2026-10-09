@@ -36,9 +36,10 @@ public class UrlKey {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof UrlKey other)) {
+        if (!(obj instanceof UrlKey)) {
             return false;
         }
+        UrlKey other = (UrlKey) obj;
         return Objects.equals(urlString, other.urlString) && methodHttp == other.methodHttp;
     }
 

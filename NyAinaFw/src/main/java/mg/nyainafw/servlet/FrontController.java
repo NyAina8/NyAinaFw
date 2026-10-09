@@ -2,6 +2,7 @@ package mg.nyainafw.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Map;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -31,7 +32,7 @@ public class FrontController extends HttpServlet {
             throws UrlNotSupportedException, ReflectiveOperationException {
         String url = getRequestedUrl(request);
         UrlHTTPMethod method = UrlHTTPMethod.buildUrlHTTPMethod(request.getMethod());
-        return urlProcessor.executeRequest(new UrlKey(url, method));
+        return urlProcessor.executeRequest(new UrlKey(url, method), request);
     }
 
     private String getRequestedUrl(HttpServletRequest request) {
@@ -45,9 +46,11 @@ public class FrontController extends HttpServlet {
         response.setContentType("text/html");
         try {
             Object result = executeRequest(request);
-            if (result instanceof ModelView modelView) {
+            if (result instanceof ModelView) {
+                ModelView modelView = (ModelView) result;
                 forwardToView(request, response, modelView);
-            } else if (result instanceof ApiResponse apiResponse) {
+            } else if (result instanceof ApiResponse) {
+                ApiResponse apiResponse = (ApiResponse) result;
                 writeApiResponse(response, apiResponse);
             } else {
                 PrintWriter out = response.getWriter();
@@ -62,12 +65,17 @@ public class FrontController extends HttpServlet {
             PrintWriter out = response.getWriter();
             printError(out, e.getMessage());
             e.printStackTrace();
+        } catch (RuntimeException e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            PrintWriter out = response.getWriter();
+            printError(out, e.getMessage());
+            e.printStackTrace();
         }
     }
 
     private void forwardToView(HttpServletRequest request, HttpServletResponse response, ModelView modelView)
             throws ServletException, IOException {
-        for (var entry : modelView.getData().entrySet()) {
+        for (Map.Entry<String, Object> entry : modelView.getData().entrySet()) {
             request.setAttribute(entry.getKey(), entry.getValue());
         }
 
