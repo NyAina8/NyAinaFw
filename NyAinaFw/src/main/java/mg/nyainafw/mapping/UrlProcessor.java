@@ -1,5 +1,6 @@
 package mg.nyainafw.mapping;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -8,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Part;
 import mg.nyainafw.annotation.MyController;
 import mg.nyainafw.annotation.UrlMapping;
 import mg.nyainafw.err.UrlAlreadyDefinedException;
@@ -38,11 +41,15 @@ public class UrlProcessor {
     }
 
     public Object executeRequest(UrlKey url) throws UrlNotSupportedException, ReflectiveOperationException {
-        return executeRequest(url, null);
+        try {
+            return executeRequest(url, null);
+        } catch (ServletException | IOException e) {
+            throw new IllegalStateException("Erreur lors de la lecture du fichier", e);
+        }
     }
 
     public Object executeRequest(UrlKey url, HttpServletRequest request)
-            throws UrlNotSupportedException, ReflectiveOperationException {
+            throws UrlNotSupportedException, ReflectiveOperationException, ServletException, IOException {
         if (!urlMapps.containsKey(url)) {
             throw new UrlNotSupportedException(url, urlMapps);
         }
@@ -52,7 +59,8 @@ public class UrlProcessor {
         return map.getReflectMethod().invoke(map.getPrototypeSeed(), args);
     }
 
-    private Object[] resolveMethodArguments(Method method, HttpServletRequest request) {
+    private Object[] resolveMethodArguments(Method method, HttpServletRequest request)
+            throws ServletException, IOException {
         Parameter[] parameters = method.getParameters();
         Object[] args = new Object[parameters.length];
 
@@ -66,7 +74,9 @@ public class UrlProcessor {
             }
 
             String parameterName = getParameterName(parameter);
-            if (isSimpleType(parameterType)) {
+            if (parameterType.equals(Part.class)) {
+                args[i] = request == null ? null : request.getPart(parameterName);
+            } else if (isSimpleType(parameterType)) {
                 String rawValue = request == null ? null : request.getParameter(parameterName);
                 args[i] = convertSimpleValue(rawValue, parameterType, parameterName);
             } else {
@@ -77,11 +87,24 @@ public class UrlProcessor {
         return args;
     }
 
-    private Object bindObject(Class<?> type, String parameterName, HttpServletRequest request) {
+    private Object bindObject(Class<?> type, String parameterName, HttpServletRequest request)
+            throws ServletException, IOException {
         try {
             Object instance = type.getDeclaredConstructor().newInstance();
             for (Field field : type.getDeclaredFields()) {
-                if (!isSimpleType(field.getType())) {
+                if (!isSimpleType(field.getType()) && !field.getType().equals(Part.class)) {
+                    continue;
+                }
+
+                if (field.getType().equals(Part.class)) {
+                    Part part = request == null ? null : request.getPart(parameterName + "." + field.getName());
+                    if (part == null && request != null) {
+                        part = request.getPart(field.getName());
+                    }
+                    if (part != null) {
+                        field.setAccessible(true);
+                        field.set(instance, part);
+                    }
                     continue;
                 }
 

@@ -1,7 +1,18 @@
 package test.controller;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.UUID;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Part;
 import mg.nyainafw.annotation.MyController;
 import mg.nyainafw.annotation.UrlMapping;
+import mg.nyainafw.mapping.UrlHTTPMethod;
 import mg.nyainafw.model.ApiResponse;
 import mg.nyainafw.model.ModelView;
 import test.model.Produit;
@@ -57,5 +68,43 @@ public class TestController {
                         + ", actif=" + produit.getActif());
         modelView.addObject("nomFramework", "NyAinaFw");
         return modelView;
+    }
+
+    @UrlMapping("/upload")
+    public ModelView uploadForm() {
+        return new ModelView("/upload");
+    }
+
+    @UrlMapping(value = "/upload", httpMethod = UrlHTTPMethod.POST)
+    public ModelView upload(String titre, Part fichier, HttpServletRequest request) throws IOException {
+        ModelView result = new ModelView("/upload-result");
+        if (fichier == null || fichier.getSize() == 0 || fichier.getSubmittedFileName() == null
+                || fichier.getSubmittedFileName().isBlank()) {
+            result.addObject("message", "Choisissez un fichier avant d'envoyer le formulaire.");
+            return result;
+        }
+
+        String configuredDirectory = request.getServletContext().getInitParameter("UPLOAD_DIR");
+        Path directory = configuredDirectory == null || configuredDirectory.isBlank()
+                ? Paths.get(System.getProperty("java.io.tmpdir"), "nyainafw-uploads")
+                : Paths.get(configuredDirectory);
+        Files.createDirectories(directory);
+
+        String originalName = Paths.get(fichier.getSubmittedFileName().replace('\\', '/')).getFileName().toString();
+        String extension = originalName.lastIndexOf('.') > 0
+                ? originalName.substring(originalName.lastIndexOf('.')) : "";
+        if (!extension.matches("\\.[A-Za-z0-9]{1,16}")) {
+            extension = "";
+        }
+        String storedName = UUID.randomUUID().toString() + extension;
+        try (InputStream input = fichier.getInputStream()) {
+            Files.copy(input, directory.resolve(storedName), StandardCopyOption.REPLACE_EXISTING);
+        }
+
+        result.addObject("message", "Fichier enregistre.");
+        result.addObject("titre", titre);
+        result.addObject("storedName", storedName);
+        result.addObject("size", fichier.getSize());
+        return result;
     }
 }

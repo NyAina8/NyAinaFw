@@ -10,6 +10,11 @@
         <param-value>test.controller</param-value>
     </context-param>
 
+    <context-param>
+        <param-name>UPLOAD_DIR</param-name>
+        <param-value>/tmp/nyainafw-uploads</param-value>
+    </context-param>
+
     <listener>
         <listener-class>mg.nyainafw.servlet.listener.FrontServletContextListener</listener-class>
     </listener>

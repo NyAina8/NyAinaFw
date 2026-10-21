@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.util.Map;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,7 +18,8 @@ import mg.nyainafw.model.ModelView;
 import mg.nyainafw.servlet.listener.FrontServletContextListener;
 import mg.nyainafw.util.JsonSerializer;
 
-public class FrontController extends HttpServlet {
+@MultipartConfig(maxFileSize = 10 * 1024 * 1024, maxRequestSize = 11 * 1024 * 1024)
+public class FrontController extends HttpServlet {e
     private UrlProcessor urlProcessor;
 
     @Override
@@ -29,7 +31,7 @@ public class FrontController extends HttpServlet {
         }
     }
     private Object executeRequest(HttpServletRequest request)
-            throws UrlNotSupportedException, ReflectiveOperationException {
+            throws UrlNotSupportedException, ReflectiveOperationException, ServletException, IOException {
         String url = getRequestedUrl(request);
         UrlHTTPMethod method = UrlHTTPMethod.buildUrlHTTPMethod(request.getMethod());
         return urlProcessor.executeRequest(new UrlKey(url, method), request);
