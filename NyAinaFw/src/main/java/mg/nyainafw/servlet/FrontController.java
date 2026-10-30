@@ -22,6 +22,7 @@ import mg.nyainafw.util.JsonSerializer;
 public class FrontController extends HttpServlet {
     private UrlProcessor urlProcessor;
     private String userSessionKey;
+    private String roleSessionKey;
     private final AuthenticationChecker authenticationChecker = new AuthenticationChecker();
 
     @Override
@@ -32,6 +33,7 @@ public class FrontController extends HttpServlet {
             throw new ServletException("UrlProcessor introuvable dans le ServletContext");
         }
         userSessionKey = (String) getServletContext().getAttribute(FrontServletContextListener.USER_SESSION_KEY_ATTR);
+        roleSessionKey = (String) getServletContext().getAttribute(FrontServletContextListener.ROLE_SESSION_KEY_ATTR);
     }
     private Object executeRequest(HttpServletRequest request, UrlKey url)
             throws UrlNotSupportedException, ReflectiveOperationException, ServletException, IOException {
@@ -49,8 +51,11 @@ public class FrontController extends HttpServlet {
         response.setContentType("text/html");
         try {
             UrlKey url = new UrlKey(getRequestedUrl(request), UrlHTTPMethod.buildUrlHTTPMethod(request.getMethod()));
-            if (!authenticationChecker.isAuthorized(urlProcessor, url, request, userSessionKey)) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Connexion requise");
+            int authStatus = authenticationChecker.checkStatus(urlProcessor, url, request,
+                    userSessionKey, roleSessionKey);
+            if (authStatus != HttpServletResponse.SC_OK) {
+                response.sendError(authStatus, authStatus == HttpServletResponse.SC_UNAUTHORIZED
+                        ? "Connexion requise" : "Role insuffisant");
                 return;
             }
             Object result = executeRequest(request, url);

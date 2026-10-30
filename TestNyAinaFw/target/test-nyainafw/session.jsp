@@ -13,9 +13,15 @@
     <form action="${pageContext.request.contextPath}/session/connexion" method="post">
         <label for="utilisateur">Nom d'utilisateur</label>
         <input id="utilisateur" name="utilisateur" type="text" required>
+        <label for="role">Role</label>
+        <select id="role" name="role">
+            <option value="membre">Membre</option>
+            <option value="admin">Admin</option>
+        </select>
         <button type="submit">Enregistrer</button>
     </form>
     <p><a href="${pageContext.request.contextPath}/session/profil">Voir le profil</a></p>
+    <p><a href="${pageContext.request.contextPath}/session/admin">Page admin</a></p>
     <form action="${pageContext.request.contextPath}/session/deconnexion" method="post">
         <button type="submit">Se deconnecter</button>
     </form>

@@ -19,6 +19,8 @@ public class FrontServletContextListener implements ServletContextListener {
     public static final String CONTROLLER_PACKAGE = "CONTROLLER_PACKAGE";
     public static final String USER_SESSION_KEY_PARAM = "auth.user-session-key";
     public static final String USER_SESSION_KEY_ATTR = "userSessionKey";
+    public static final String ROLE_SESSION_KEY_PARAM = "auth.role-session-key";
+    public static final String ROLE_SESSION_KEY_ATTR = "roleSessionKey";
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
@@ -28,6 +30,11 @@ public class FrontServletContextListener implements ServletContextListener {
             throw new IllegalStateException("Le parametre auth.user-session-key est obligatoire");
         }
         context.setAttribute(USER_SESSION_KEY_ATTR, userSessionKey);
+        String roleSessionKey = context.getInitParameter(ROLE_SESSION_KEY_PARAM);
+        if (roleSessionKey == null || roleSessionKey.isBlank()) {
+            throw new IllegalStateException("Le parametre auth.role-session-key est obligatoire");
+        }
+        context.setAttribute(ROLE_SESSION_KEY_ATTR, roleSessionKey);
         String controllerPackage = context.getInitParameter(CONTROLLER_PACKAGE);
         if (controllerPackage == null) {
             controllerPackage = "";

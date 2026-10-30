@@ -1,6 +1,7 @@
 /home/nyaina/Documents/ProgSis/NyAinaFw-1/NyAinaFw/src/main/java/mg/nyainafw/App.java
 /home/nyaina/Documents/ProgSis/NyAinaFw-1/NyAinaFw/src/main/java/mg/nyainafw/annotation/Authentification.java
 /home/nyaina/Documents/ProgSis/NyAinaFw-1/NyAinaFw/src/main/java/mg/nyainafw/annotation/MyController.java
+/home/nyaina/Documents/ProgSis/NyAinaFw-1/NyAinaFw/src/main/java/mg/nyainafw/annotation/Role.java
 /home/nyaina/Documents/ProgSis/NyAinaFw-1/NyAinaFw/src/main/java/mg/nyainafw/annotation/UrlMapping.java
 /home/nyaina/Documents/ProgSis/NyAinaFw-1/NyAinaFw/src/main/java/mg/nyainafw/err/UrlAlreadyDefinedException.java
 /home/nyaina/Documents/ProgSis/NyAinaFw-1/NyAinaFw/src/main/java/mg/nyainafw/err/UrlNotSupportedException.java

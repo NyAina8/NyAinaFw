@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.Part;
 import mg.nyainafw.annotation.MyController;
 import mg.nyainafw.annotation.Authentification;
+import mg.nyainafw.annotation.Role;
 import mg.nyainafw.annotation.UrlMapping;
 import mg.nyainafw.mapping.UrlHTTPMethod;
 import mg.nyainafw.model.ApiResponse;
@@ -115,7 +116,7 @@ public class TestController {
         return new ModelView("/session");
     }
     @UrlMapping(value = "/session/connexion", httpMethod = UrlHTTPMethod.POST)
-    public ModelView connexion(String utilisateur, MySession session) {
+    public ModelView connexion(String utilisateur, String role, MySession session) {
         ModelView view = new ModelView("/session");
         if (utilisateur == null || utilisateur.isBlank()) {
             view.addObject("message", "Entrez un nom d'utilisateur.");
@@ -123,6 +124,7 @@ public class TestController {
         }
 
         session.setAttribute("utilisateur", utilisateur.trim());
+        session.setAttribute("role", "admin".equals(role) ? "admin" : "membre");
         view.addObject("message", "Nom enregistre dans la session.");
         return view;
     }
@@ -132,6 +134,16 @@ public class TestController {
     public ApiResponse profil(MySession session) {
         Map<String, Object> data = new HashMap<>();
         data.put("utilisateur", session.getAttribute("utilisateur"));
+        return ApiResponse.ok(data);
+    }
+
+    @UrlMapping("/session/admin")
+    @Authentification
+    @Role("admin")
+    public ApiResponse admin(MySession session) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("utilisateur", session.getAttribute("utilisateur"));
+        data.put("role", session.getAttribute("role"));
         return ApiResponse.ok(data);
     }
 
