@@ -21,6 +21,8 @@ import mg.nyainafw.util.JsonSerializer;
 @MultipartConfig(maxFileSize = 10 * 1024 * 1024, maxRequestSize = 11 * 1024 * 1024)
 public class FrontController extends HttpServlet {
     private UrlProcessor urlProcessor;
+    private String userSessionKey;
+    private final AuthenticationChecker authenticationChecker = new AuthenticationChecker();
 
     @Override
     public void init() throws ServletException {
@@ -29,12 +31,11 @@ public class FrontController extends HttpServlet {
         if (urlProcessor == null) {
             throw new ServletException("UrlProcessor introuvable dans le ServletContext");
         }
+        userSessionKey = (String) getServletContext().getAttribute(FrontServletContextListener.USER_SESSION_KEY_ATTR);
     }
-    private Object executeRequest(HttpServletRequest request)
+    private Object executeRequest(HttpServletRequest request, UrlKey url)
             throws UrlNotSupportedException, ReflectiveOperationException, ServletException, IOException {
-        String url = getRequestedUrl(request);
-        UrlHTTPMethod method = UrlHTTPMethod.buildUrlHTTPMethod(request.getMethod());
-        return urlProcessor.executeRequest(new UrlKey(url, method), request);
+        return urlProcessor.executeRequest(url, request);
     }
 
     private String getRequestedUrl(HttpServletRequest request) {
@@ -47,7 +48,12 @@ public class FrontController extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html");
         try {
-            Object result = executeRequest(request);
+            UrlKey url = new UrlKey(getRequestedUrl(request), UrlHTTPMethod.buildUrlHTTPMethod(request.getMethod()));
+            if (!authenticationChecker.isAuthorized(urlProcessor, url, request, userSessionKey)) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Connexion requise");
+                return;
+            }
+            Object result = executeRequest(request, url);
             if (result instanceof ModelView) {
                 ModelView modelView = (ModelView) result;
                 forwardToView(request, response, modelView);

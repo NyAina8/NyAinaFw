@@ -17,10 +17,17 @@ public class FrontServletContextListener implements ServletContextListener {
     public static final String URL_PROCESSOR_ATTR = "urlProcessor";
     public static final String SESSIONS_ATTR = "sessions";
     public static final String CONTROLLER_PACKAGE = "CONTROLLER_PACKAGE";
+    public static final String USER_SESSION_KEY_PARAM = "auth.user-session-key";
+    public static final String USER_SESSION_KEY_ATTR = "userSessionKey";
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         ServletContext context = sce.getServletContext();
+        String userSessionKey = context.getInitParameter(USER_SESSION_KEY_PARAM);
+        if (userSessionKey == null || userSessionKey.isBlank()) {
+            throw new IllegalStateException("Le parametre auth.user-session-key est obligatoire");
+        }
+        context.setAttribute(USER_SESSION_KEY_ATTR, userSessionKey);
         String controllerPackage = context.getInitParameter(CONTROLLER_PACKAGE);
         if (controllerPackage == null) {
             controllerPackage = "";

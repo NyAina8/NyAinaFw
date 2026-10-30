@@ -11,6 +11,7 @@ import java.util.UUID;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.Part;
 import mg.nyainafw.annotation.MyController;
+import mg.nyainafw.annotation.Authentification;
 import mg.nyainafw.annotation.UrlMapping;
 import mg.nyainafw.mapping.UrlHTTPMethod;
 import mg.nyainafw.model.ApiResponse;
@@ -127,6 +128,7 @@ public class TestController {
     }
 
     @UrlMapping("/session/profil")
+    @Authentification
     public ApiResponse profil(MySession session) {
         Map<String, Object> data = new HashMap<>();
         data.put("utilisateur", session.getAttribute("utilisateur"));

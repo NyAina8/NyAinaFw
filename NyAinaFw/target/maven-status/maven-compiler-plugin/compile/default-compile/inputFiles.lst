@@ -1,4 +1,5 @@
 /home/nyaina/Documents/ProgSis/NyAinaFw-1/NyAinaFw/src/main/java/mg/nyainafw/App.java
+/home/nyaina/Documents/ProgSis/NyAinaFw-1/NyAinaFw/src/main/java/mg/nyainafw/annotation/Authentification.java
 /home/nyaina/Documents/ProgSis/NyAinaFw-1/NyAinaFw/src/main/java/mg/nyainafw/annotation/MyController.java
 /home/nyaina/Documents/ProgSis/NyAinaFw-1/NyAinaFw/src/main/java/mg/nyainafw/annotation/UrlMapping.java
 /home/nyaina/Documents/ProgSis/NyAinaFw-1/NyAinaFw/src/main/java/mg/nyainafw/err/UrlAlreadyDefinedException.java
@@ -10,6 +11,7 @@
 /home/nyaina/Documents/ProgSis/NyAinaFw-1/NyAinaFw/src/main/java/mg/nyainafw/model/ApiResponse.java
 /home/nyaina/Documents/ProgSis/NyAinaFw-1/NyAinaFw/src/main/java/mg/nyainafw/model/ModelView.java
 /home/nyaina/Documents/ProgSis/NyAinaFw-1/NyAinaFw/src/main/java/mg/nyainafw/model/MySession.java
+/home/nyaina/Documents/ProgSis/NyAinaFw-1/NyAinaFw/src/main/java/mg/nyainafw/servlet/AuthenticationChecker.java
 /home/nyaina/Documents/ProgSis/NyAinaFw-1/NyAinaFw/src/main/java/mg/nyainafw/servlet/FrontController.java
 /home/nyaina/Documents/ProgSis/NyAinaFw-1/NyAinaFw/src/main/java/mg/nyainafw/servlet/listener/FrontServletContextListener.java
 /home/nyaina/Documents/ProgSis/NyAinaFw-1/NyAinaFw/src/main/java/mg/nyainafw/servlet/listener/SessionLifecycleListener.java

@@ -11,6 +11,11 @@
     </context-param>
 
     <context-param>
+        <param-name>auth.user-session-key</param-name>
+        <param-value>utilisateur</param-value>
+    </context-param>
+
+    <context-param>
         <param-name>UPLOAD_DIR</param-name>
         <param-value>/tmp/nyainafw-uploads</param-value>
     </context-param>
