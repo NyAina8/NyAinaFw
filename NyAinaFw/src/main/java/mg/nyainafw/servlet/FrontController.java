@@ -19,7 +19,7 @@ import mg.nyainafw.servlet.listener.FrontServletContextListener;
 import mg.nyainafw.util.JsonSerializer;
 
 @MultipartConfig(maxFileSize = 10 * 1024 * 1024, maxRequestSize = 11 * 1024 * 1024)
-public class FrontController extends HttpServlet {e
+public class FrontController extends HttpServlet {
     private UrlProcessor urlProcessor;
 
     @Override

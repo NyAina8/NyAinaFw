@@ -1,6 +1,7 @@
 package mg.nyainafw.servlet.listener;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
@@ -8,11 +9,13 @@ import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
 import mg.nyainafw.annotation.MyController;
 import mg.nyainafw.mapping.UrlProcessor;
+import mg.nyainafw.model.MySession;
 import mg.nyainafw.util.ClasspathScanner;
 
 @WebListener
 public class FrontServletContextListener implements ServletContextListener {
     public static final String URL_PROCESSOR_ATTR = "urlProcessor";
+    public static final String SESSIONS_ATTR = "sessions";
     public static final String CONTROLLER_PACKAGE = "CONTROLLER_PACKAGE";
 
     @Override
@@ -34,6 +37,7 @@ public class FrontServletContextListener implements ServletContextListener {
         }
 
         context.setAttribute(URL_PROCESSOR_ATTR, urlProcessor);
+        context.setAttribute(SESSIONS_ATTR, new ConcurrentHashMap<String, MySession>());
     }
 
     @Override

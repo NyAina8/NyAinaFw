@@ -18,6 +18,9 @@
     <listener>
         <listener-class>mg.nyainafw.servlet.listener.FrontServletContextListener</listener-class>
     </listener>
+    <listener>
+        <listener-class>mg.nyainafw.servlet.listener.SessionLifecycleListener</listener-class>
+    </listener>
 
     <servlet>
         <servlet-name>FrontController</servlet-name>

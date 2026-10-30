@@ -14,4 +14,6 @@ mg/nyainafw/util/JsonSerializer.class
 mg/nyainafw/mapping/UrlControllerMap.class
 mg/nyainafw/model/ApiResponse.class
 mg/nyainafw/mapping/UrlKey.class
+mg/nyainafw/model/MySession.class
+mg/nyainafw/servlet/listener/SessionLifecycleListener.class
 mg/nyainafw/model/ModelView.class

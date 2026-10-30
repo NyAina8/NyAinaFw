@@ -5,16 +5,20 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import mg.nyainafw.annotation.MyController;
 import mg.nyainafw.annotation.UrlMapping;
 import mg.nyainafw.err.UrlAlreadyDefinedException;
 import mg.nyainafw.err.UrlNotSupportedException;
+import mg.nyainafw.model.MySession;
+import mg.nyainafw.servlet.listener.FrontServletContextListener;
 import jakarta.servlet.http.HttpServletRequest;
 
 public class UrlProcessor {
@@ -56,7 +60,13 @@ public class UrlProcessor {
 
         UrlControllerMap map = urlMapps.get(url);
         Object[] args = resolveMethodArguments(map.getReflectMethod(), request);
-        return map.getReflectMethod().invoke(map.getPrototypeSeed(), args);
+        Object result = map.getReflectMethod().invoke(map.getPrototypeSeed(), args);
+        for (Object arg : args) {
+            if (arg instanceof MySession) {
+                syncSession((MySession) arg, request);
+            }
+        }
+        return result;
     }
 
     private Object[] resolveMethodArguments(Method method, HttpServletRequest request)
@@ -72,6 +82,14 @@ public class UrlProcessor {
                 args[i] = request;
                 continue;
             }
+            if (parameterType.equals(HttpSession.class)) {
+                args[i] = request == null ? null : request.getSession();
+                continue;
+            }
+            if (parameterType.equals(MySession.class)) {
+                args[i] = readSession(request);
+                continue;
+            }
 
             String parameterName = getParameterName(parameter);
             if (parameterType.equals(Part.class)) {
@@ -85,6 +103,54 @@ public class UrlProcessor {
         }
 
         return args;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, MySession> sessionRegistry(HttpServletRequest request) {
+        return (Map<String, MySession>) request.getServletContext()
+                .getAttribute(FrontServletContextListener.SESSIONS_ATTR);
+    }
+
+    private MySession readSession(HttpServletRequest request) {
+        MySession data = new MySession();
+        if (request == null) {
+            return data;
+        }
+        HttpSession session = request.getSession();
+        Map<String, MySession> sessions = sessionRegistry(request);
+        if (sessions != null) {
+            sessions.putIfAbsent(session.getId(), new MySession());
+        }
+        for (String name : Collections.list(session.getAttributeNames())) {
+            data.setAttribute(name, session.getAttribute(name));
+        }
+        return data;
+    }
+
+    private void syncSession(MySession data, HttpServletRequest request) {
+        if (request == null) {
+            return;
+        }
+        HttpSession session = request.getSession();
+        Map<String, MySession> sessions = sessionRegistry(request);
+        if (data.isDestroyed()) {
+            if (sessions != null) {
+                sessions.remove(session.getId());
+            }
+            session.invalidate();
+            return;
+        }
+        for (String name : Collections.list(session.getAttributeNames())) {
+            if (!data.getSessionData().containsKey(name)) {
+                session.removeAttribute(name);
+            }
+        }
+        for (Map.Entry<String, Object> entry : data.getSessionData().entrySet()) {
+            session.setAttribute(entry.getKey(), entry.getValue());
+        }
+        if (sessions != null) {
+            sessions.put(session.getId(), data);
+        }
     }
 
     private Object bindObject(Class<?> type, String parameterName, HttpServletRequest request)

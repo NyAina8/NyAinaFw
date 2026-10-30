@@ -15,6 +15,7 @@ import mg.nyainafw.annotation.UrlMapping;
 import mg.nyainafw.mapping.UrlHTTPMethod;
 import mg.nyainafw.model.ApiResponse;
 import mg.nyainafw.model.ModelView;
+import mg.nyainafw.model.MySession;
 import test.model.Produit;
 
 import java.util.HashMap;
@@ -106,5 +107,37 @@ public class TestController {
         result.addObject("storedName", storedName);
         result.addObject("size", fichier.getSize());
         return result;
+    }
+
+    @UrlMapping("/session")
+    public ModelView sessionForm() {
+        return new ModelView("/session");
+    }
+    @UrlMapping(value = "/session/connexion", httpMethod = UrlHTTPMethod.POST)
+    public ModelView connexion(String utilisateur, MySession session) {
+        ModelView view = new ModelView("/session");
+        if (utilisateur == null || utilisateur.isBlank()) {
+            view.addObject("message", "Entrez un nom d'utilisateur.");
+            return view;
+        }
+
+        session.setAttribute("utilisateur", utilisateur.trim());
+        view.addObject("message", "Nom enregistre dans la session.");
+        return view;
+    }
+
+    @UrlMapping("/session/profil")
+    public ApiResponse profil(MySession session) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("utilisateur", session.getAttribute("utilisateur"));
+        return ApiResponse.ok(data);
+    }
+
+    @UrlMapping(value = "/session/deconnexion", httpMethod = UrlHTTPMethod.POST)
+    public ModelView deconnexion(MySession session) {
+        session.destroy();
+        ModelView view = new ModelView("/session");
+        view.addObject("message", "Session fermee.");
+        return view;
     }
 }
